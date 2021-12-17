@@ -1,0 +1,54 @@
+services:
+  benthos:
+    depends_on:
+      - redis
+      - rabbitmq
+      - mqtt
+    image: jeffail/benthos:3
+    networks:
+      - default
+    ports:
+      - "127.0.0.1:4195:4195"
+    configs:
+      - benthos.yaml
+    secrets:
+      - api-key
+
+## IF REDIS
+  redis:
+    image: redis:6
+    networks:
+      - default
+      - ingest
+## END IF REDIS
+
+## IF RABBITMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+    - 127.0.0.1:15672:15672
+    networks:
+      - default
+      - ingest
+## END IF RABBITMQ
+
+## IF MQTT
+  mqtt:
+    image: eclipse-mosquitto:2
+    command: mosquitto -c /mosquitto-no-auth.conf
+    networks:
+      - default
+      - ingest
+## END IF MQTT
+
+configs:
+  benthos.yaml:
+    file: ./benthos.yaml
+
+secrets:
+  api-key:
+    file: ./apikey.txt
+
+networks:
+  ingest:
+    name: ingest

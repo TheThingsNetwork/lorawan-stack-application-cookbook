@@ -1,0 +1,18 @@
+services:
+  memcached:
+    image: memcached:1
+  benthos:
+    image: jeffail/benthos:3
+    networks:
+      - default
+      - ingest
+    configs:
+      - benthos.yaml
+
+configs:
+  benthos.yaml:
+    file: ./benthos.yaml
+
+networks:
+  ingest:
+    external: true

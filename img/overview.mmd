@@ -1,0 +1,54 @@
+flowchart LR
+  tts[The Things Stack]
+  tts -- webhook --> proxy
+  style tts stroke-dasharray: 5 5
+
+  proxy --> ingest
+
+  subgraph ingest
+    direction TB
+
+    ingest_inputs[input: HTTP Server]
+    style ingest_inputs stroke-dasharray: 5 5
+
+    ingest_outputs[output: Publish]
+    style ingest_outputs stroke-dasharray: 5 5
+
+    subgraph ingest_processing[Processing]
+      check[API Key Check]
+    end
+
+    ingest_inputs --> ingest_processing
+    ingest_processing --> ingest_outputs
+  end
+
+  pubsub[Pub/Sub]
+
+  ingest --> pubsub
+
+  pubsub --> process
+
+  subgraph process
+    direction TB
+
+    process_inputs[input: Subscribe]
+    style process_inputs stroke-dasharray: 5 5
+
+    process_inputs --> process_processing
+
+    subgraph process_processing[Processing]
+      dedupe[De-duplication]
+    end
+
+    process_processing --> process_outputs
+
+    process_outputs[output]
+    style process_outputs stroke-dasharray: 5 5
+  end
+
+  process --> stdout
+
+  other["other outputs"]
+  style other stroke-dasharray: 5 5
+
+  process --> other

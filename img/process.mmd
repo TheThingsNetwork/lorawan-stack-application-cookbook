@@ -1,0 +1,35 @@
+flowchart LR
+  redis[Redis Streams]
+  amqp[RabbitMQ]
+  mqtt[MQTT]
+
+  redis --> process
+  amqp --> process
+  mqtt --> process
+
+  subgraph process[Benthos]
+    direction TB
+
+    process_inputs[input: Subscribe]
+    style process_inputs stroke-dasharray: 5 5
+
+    process_inputs --> process_processing
+
+    subgraph process_processing[Processing]
+      dedupe[De-duplication]
+    end
+
+    process_processing --> process_outputs
+
+    process_outputs[output]
+    style process_outputs stroke-dasharray: 5 5
+  end
+
+  process --> stdout
+
+  other["other outputs"]
+  style other stroke-dasharray: 5 5
+
+  process --> other
+
+

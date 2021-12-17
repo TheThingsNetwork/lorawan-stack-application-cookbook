@@ -1,0 +1,54 @@
+http:
+  enabled: false
+
+cache_resources:
+  - label: memcached
+    memcached:
+      addresses:
+        - memcached:11211
+
+input:
+  broker:
+    inputs:
+
+## IF REDIS
+      - redis_streams:
+          url: tcp://redis:6379
+          streams:
+          - ingest
+          consumer_group: process-stdout
+          client_id: benthos_${HOSTNAME}
+## END IF REDIS
+
+## IF RABBITMQ
+      - amqp_0_9:
+          urls:
+            - amqp://guest:guest@rabbitmq:5672/
+          queue: process-stdout
+          queue_declare:
+            enabled: true
+          bindings_declare:
+            - exchange: ingest
+              key: ingest
+## END IF RABBITMQ
+
+## IF MQTT
+      - mqtt:
+          urls:
+            - tcp://mqtt:1883
+          keepalive: 30
+          topics:
+            - v3/+/devices/+/up
+          client_id: benthos_${HOSTNAME}
+## END IF MQTT
+
+pipeline:
+  processors:
+    - dedupe:
+        cache: memcached
+        hash: xxhash
+        drop_on_err: true
+
+output:
+  stdout:
+    codec: lines

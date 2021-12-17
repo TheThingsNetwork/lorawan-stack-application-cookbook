@@ -1,0 +1,44 @@
+input:
+  http_server:
+    path: /post/{up_type}
+
+pipeline:
+  processors:
+    - switch:
+        - check: (meta("X-Apikey") | "") == file("/run/secrets/api-key").trim()
+          processors:
+            - noop: {}
+        - processors:
+            - log: { message: "Dropping message: incorrect API key" }
+            - bloblang: root = deleted()
+
+output:
+  broker:
+    pattern: fan_out
+    outputs:
+
+## IF REDIS
+      - redis_streams:
+          url: tcp://redis:6379
+          stream: ingest
+          max_length: 10_000
+## END IF REDIS
+
+## IF RABBITMQ
+      - amqp_0_9:
+          urls:
+            - amqp://guest:guest@rabbitmq:5672/
+          exchange: ingest
+          key: ingest
+          exchange_declare:
+            enabled: true
+## END IF RABBITMQ
+
+## IF MQTT
+      - mqtt:
+          urls:
+            - tcp://mqtt:1883
+          keepalive: 30
+          topic: v3/${! json("end_device_ids.application_ids.application_id") }/devices/${! json("end_device_ids.device_id") }/${! meta("up_type") }
+          client_id: benthos_${HOSTNAME}
+## END IF MQTT

@@ -1,0 +1,32 @@
+flowchart LR
+  nginx
+  style nginx stroke-dasharray: 5 5
+
+  nginx -- webhook --> ingest
+
+  subgraph ingest[Benthos]
+    direction TB
+
+    ingest_inputs[input: HTTP Server]
+    style ingest_inputs stroke-dasharray: 5 5
+
+    ingest_outputs[output: Publish]
+    style ingest_outputs stroke-dasharray: 5 5
+
+    subgraph ingest_processing[Processing]
+      check[API Key Check]
+    end
+
+    ingest_inputs --> ingest_processing
+    ingest_processing --> ingest_outputs
+  end
+
+  redis[Redis Streams]
+  amqp[RabbitMQ]
+  mqtt[MQTT]
+
+  ingest --> redis
+  ingest --> amqp
+  ingest --> mqtt
+
+
