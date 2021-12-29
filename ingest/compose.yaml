@@ -1,9 +1,15 @@
 services:
   benthos:
     depends_on:
+## IF REDIS
       - redis
+## END IF REDIS
+## IF RABBITMQ
       - rabbitmq
+## END IF RABBITMQ
+## IF MQTT
       - mqtt
+## END IF MQTT
     image: jeffail/benthos:3
     networks:
       - default
