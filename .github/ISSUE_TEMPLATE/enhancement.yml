@@ -1,0 +1,40 @@
+name: Feature Request
+description: Request a new feature
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    attributes:
+      label: Summary
+      description: Describe the feature in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Use Case
+      description: Explain how this new feature would be used.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Implementation
+      description: Describe how you propose to implement this feature.
+  - type: textarea
+    attributes:
+      label: Testing
+      description: Describe how you propose to test this feature.
+  - type: checkboxes
+    attributes:
+      label: Contributing
+      description: Indicate how you can contribute.
+      options:
+        - label: I can do more research
+        - label: I can implement the feature if I get some help
+        - label: I can implement the feature without help (but I'll wait until the feature request is accepted)
+        - label: I can test the feature before it's released
+  - type: checkboxes
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow The Things Network's [Community Code of Conduct](https://github.com/TheThingsNetwork/Manifesto/blob/master/CodeOfConduct.md)
+      options:
+        - label: I agree to follow TTN's Community Code of Conduct
+          required: true

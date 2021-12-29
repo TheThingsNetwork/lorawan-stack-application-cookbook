@@ -1,0 +1,37 @@
+name: Bug Report
+description: Report a problem
+labels: ["bug", "triage"]
+body:
+  - type: textarea
+    attributes:
+      label: Summary
+      description: Describe the problem in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: Explain in detail how someone can reproduce the problem.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Relevant Logs
+      description: Copy and paste any relevant logs (don't screenshot your logs). This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: checkboxes
+    attributes:
+      label: Contributing
+      description: Indicate how you can contribute.
+      options:
+        - label: I can do more research
+        - label: I can implement a fix if I get some help
+        - label: I can implement a fix without help
+        - label: I can test the fix before it's released
+  - type: checkboxes
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow The Things Network's [Community Code of Conduct](https://github.com/TheThingsNetwork/Manifesto/blob/master/CodeOfConduct.md)
+      options:
+        - label: I agree to follow TTN's Community Code of Conduct
+          required: true
