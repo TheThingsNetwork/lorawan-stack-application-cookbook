@@ -1,0 +1,103 @@
+http:
+  enabled: false
+
+cache_resources:
+  - label: memcached
+    memcached:
+      addresses:
+        - memcached:11211
+
+input:
+  redis_streams:
+    url: tcp://redis:6379
+    streams:
+      - ingest
+    consumer_group: process-clickhouse
+    client_id: benthos_${HOSTNAME}
+
+pipeline:
+  processors:
+    - dedupe:
+        cache: memcached
+        hash: xxhash
+        drop_on_err: true
+
+output:
+  switch:
+    cases:
+      - check: this.exists("uplink_message")
+        output:
+          sql_insert:
+            driver: clickhouse
+            dsn: tcp://clickhouse:9000
+            table: tts_uplink_messages
+            batching:
+              count: 100
+              period: 1s
+            columns:
+              - net_id
+              - tenant_id
+              - cluster_id
+              - application_id
+              - device_id
+              - join_eui
+              - dev_eui
+              - dev_addr
+              - correlation_ids
+              - received_at
+              - session_key_id
+              - f_port
+              - f_cnt
+              - frm_payload
+              - bandwidth
+              - spreading_factor
+              - coding_rate
+              - frequency
+              - consumed_airtime
+              - rx_metadata_forwarder_net_ids
+              - rx_metadata_forwarder_tenant_ids
+              - rx_metadata_forwarder_cluster_ids
+              - rx_metadata_gateway_ids
+              - rx_metadata_gateway_euis
+              - rx_metadata_gateway_rssis
+              - rx_metadata_gateway_signal_rssis
+              - rx_metadata_gateway_channel_rssis
+              - rx_metadata_gateway_snrs
+              - decoded_payload_keys
+              - decoded_payload_values
+            args_mapping: |
+              let decoded_payload = (uplink_message.decoded_payload | {}).collapse().key_values().sort_by(kv -> kv.key)
+              root = [
+                uplink_message.network_ids.net_id,
+                uplink_message.network_ids.tenant_id,
+                uplink_message.network_ids.cluster_id,
+                end_device_ids.application_ids.application_id,
+                end_device_ids.device_id,
+                end_device_ids.join_eui,
+                end_device_ids.dev_eui,
+                end_device_ids.dev_addr,
+                correlation_ids,
+                uplink_message.received_at.format_timestamp("2006-01-02 15:04:05.999999", "UTC"),
+                uplink_message.session_key_id,
+                uplink_message.f_port.number().floor(),
+                uplink_message.f_cnt.number().floor(),
+                uplink_message.frm_payload,
+                uplink_message.settings.data_rate.lora.bandwidth.number().floor(),
+                uplink_message.settings.data_rate.lora.spreading_factor.number().floor(),
+                uplink_message.settings.coding_rate,
+                uplink_message.settings.frequency.number().floor(),
+                uplink_message.consumed_airtime.parse_duration(),
+                uplink_message.rx_metadata.map_each(m -> m.packet_broker.forwarder_net_id),
+                uplink_message.rx_metadata.map_each(m -> m.packet_broker.forwarder_tenant_id),
+                uplink_message.rx_metadata.map_each(m -> m.packet_broker.forwarder_cluster_id),
+                uplink_message.rx_metadata.map_each(m -> m.packet_broker.forwarder_gateway_id | m.gateway_ids.gateway_id),
+                uplink_message.rx_metadata.map_each(m -> m.packet_broker.forwarder_gateway_eui | m.gateway_ids.gateway_eui),
+                uplink_message.rx_metadata.map_each(m -> m.rssi.number().or(null)),
+                uplink_message.rx_metadata.map_each(m -> m.signal_rssi.number().or(null)),
+                uplink_message.rx_metadata.map_each(m -> m.channel_rssi.number().or(null)),
+                uplink_message.rx_metadata.map_each(m -> m.snr.number().or(null)),
+                $decoded_payload.map_each(kv -> kv.key),
+                $decoded_payload.map_each(kv -> kv.value).map_each(i -> i.number().or(null)),
+              ]
+      - output:
+          drop: {}

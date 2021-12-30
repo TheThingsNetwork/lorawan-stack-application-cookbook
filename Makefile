@@ -28,3 +28,4 @@ sync:
 deploy: sync
 	ssh -t $(SSH_USERNAME)@$(SSH_HOST) "pushd $(SSH_WORKDIR)/ingest; docker compose pull; docker compose up -d"
 	ssh -t $(SSH_USERNAME)@$(SSH_HOST) "pushd $(SSH_WORKDIR)/process; docker compose pull; docker compose up -d"
+	ssh -t $(SSH_USERNAME)@$(SSH_HOST) "pushd $(SSH_WORKDIR)/process-clickhouse; docker compose pull; docker compose up -d"
