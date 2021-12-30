@@ -1,0 +1,32 @@
+services:
+  memcached:
+    image: memcached:1
+  benthos:
+    depends_on:
+      - memcached
+      - mongo
+    image: jeffail/benthos:3
+    networks:
+      - default
+      - ingest
+    configs:
+      - benthos.yaml
+
+  mongo:
+    image: mongo:5
+    volumes:
+      - ./mongo/uplink_messages.schema.js:/docker-entrypoint-initdb.d/uplink_messages.schema.js:ro
+      - mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=tts
+
+configs:
+  benthos.yaml:
+    file: ./benthos.yaml
+
+volumes:
+  mongo-data:
+
+networks:
+  ingest:
+    external: true

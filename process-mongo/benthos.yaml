@@ -1,0 +1,43 @@
+http:
+  enabled: false
+
+cache_resources:
+  - label: memcached
+    memcached:
+      addresses:
+        - memcached:11211
+
+input:
+  redis_streams:
+    url: tcp://redis:6379
+    streams:
+      - ingest
+    consumer_group: process-mongodb
+    client_id: benthos_${HOSTNAME}
+
+pipeline:
+  processors:
+    - dedupe:
+        cache: memcached
+        hash: xxhash
+        drop_on_err: true
+
+output:
+  switch:
+    cases:
+      - check: this.exists("uplink_message")
+        output:
+          mongodb:
+            url: mongodb://mongo:27017
+            database: tts
+            collection: uplink_messages
+            operation: insert-one
+            write_concern:
+              w_timeout: 1s
+            document_map: |
+              root = this
+            batching:
+              count: 100
+              period: 1s
+      - output:
+          drop: {}
