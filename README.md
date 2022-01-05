@@ -229,23 +229,27 @@ Now let's deploy the ingest pipeline:
 % docker compose up -d
 ```
 
-## Processing Pipeline
+## Processing Pipelines
 
-The processing pipeline is responsible for subscribing to Pub/Sub, and actually processing each message. In the first version of this guide, this processing only consist of de-duplication and writing to stdout, but in future updates we'll make it more exciting.
+The processing pipelines are responsible for subscribing to Pub/Sub, and actually processing each message.
 
 ![process](./img/process.mmd.svg)
 
-The processing pipeline consists of two files:
+There are currently three processing pipelines:
 
-- `process/benthos.yaml` defines the configuration for our Benthos pipeline.
-- `process/compose.yaml` defines the containers that will run in the deployment: for now just Benthos.
+- `process-stdout`: Writes messages to standard output. This pipeline also shows how to subscribe to RabbitMQ and MQTT. The other pipelines only use Redis Streams.
+- `process-clickhouse`: Writes messages to a [Clickhouse](https://clickhouse.com/) database.
+- `process-mongo`: Writes messages to a [Mongo](https://www.mongodb.com/) database.
 
-Each of these files contains blocks that can be commented out if you only want to use one pub/sub system.
+The processing pipelines consist of two files:
 
-Let's deploy the processing pipeline:
+- `process-*/benthos.yaml` defines the configuration for our Benthos pipeline.
+- `process-*/compose.yaml` defines the containers that will run in the deployment: for now just Benthos.
+
+Let's deploy the processing pipeline that writes to standard output:
 
 ```bash
-% cd cookbook/process
+% cd cookbook/process-stdout
 
 % docker compose up -d
 ```

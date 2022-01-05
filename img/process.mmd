@@ -26,6 +26,8 @@ flowchart LR
   end
 
   process --> stdout
+  process --> Clickhouse
+  process --> Mongo
 
   other["other outputs"]
   style other stroke-dasharray: 5 5
