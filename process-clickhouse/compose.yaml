@@ -1,0 +1,30 @@
+services:
+  memcached:
+    image: memcached:1
+  benthos:
+    depends_on:
+      - memcached
+      - clickhouse
+    image: jeffail/benthos:3
+    networks:
+      - default
+      - ingest
+    configs:
+      - benthos.yaml
+
+  clickhouse:
+    image: yandex/clickhouse-server:21
+    volumes:
+      - ./clickhouse/uplink_messages.schema.sql:/docker-entrypoint-initdb.d/uplink_messages.schema.sql:ro
+      - clickhouse-data:/var/lib/clickhouse
+
+configs:
+  benthos.yaml:
+    file: ./benthos.yaml
+
+volumes:
+  clickhouse-data:
+
+networks:
+  ingest:
+    external: true
