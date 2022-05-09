@@ -10,15 +10,15 @@ CREATE TABLE IF NOT EXISTS tts_uplink_messages
   dev_addr          Nullable(FixedString(8)),  -- Hex-encoded
   correlation_ids   Array(String),
   received_at       DateTime64(6),
-  session_key_id    String, -- Base64-encoded
+  session_key_id    Nullable(String), -- Base64-encoded
   f_port            UInt8,
-  f_cnt             UInt32,
+  f_cnt             Nullable(UInt32),
   frm_payload       String, -- Base64-encoded
   bandwidth         UInt64, -- in Hz
   spreading_factor  UInt8,
-  coding_rate       LowCardinality(String),
-  frequency         UInt64, -- in Hz
-  consumed_airtime  UInt64,  -- in nanoseconds
+  coding_rate       Nullable(LowCardinality(String)),
+  frequency         Nullable(UInt64), -- in Hz
+  consumed_airtime  Nullable(UInt64),  -- in nanoseconds
 
   rx_metadata_forwarder_net_ids     Array(Nullable(FixedString(6))),
   rx_metadata_forwarder_tenant_ids  Array(Nullable(String)),
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS tts_uplink_message_decoded_payloads
   received_at       DateTime64(6),
 
   f_port            UInt8,
-  f_cnt             UInt32,
+  f_cnt             Nullable(UInt32),
 
   decoded_payload_key   String,
   decoded_payload_value Nullable(Float32)
@@ -77,9 +77,9 @@ CREATE TABLE IF NOT EXISTS tts_uplink_message_rx_metadata
 
   bandwidth         UInt64, -- in Hz
   spreading_factor  UInt8,
-  coding_rate       LowCardinality(String),
-  frequency         UInt64, -- in Hz
-  consumed_airtime  UInt64,  -- in nanoseconds
+  coding_rate       LowCardinality(Nullable(String)),
+  frequency         Nullable(UInt64), -- in Hz
+  consumed_airtime  Nullable(UInt64),  -- in nanoseconds
 
   rx_metadata_forwarder_net_id     Nullable(FixedString(6)),
   rx_metadata_forwarder_tenant_id  Nullable(String),
